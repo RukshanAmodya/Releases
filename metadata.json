@@ -1,6 +1,0 @@
-{
-  "name": "ArtimaX",
-  "description": "Premium Pinterest-Style Art & Products E-Commerce Marketplace featuring true asymmetric masonry discovery feed, dual-sided Buyer/Seller portals, and a Firebase/Supabase-driven realtime architecture.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
