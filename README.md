@@ -1,11 +1,11 @@
-## Run Locally
+# Notice
 
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
+⚠️ **Important Notice**
 
+This repository is provided for demonstration, testing, and reference purposes only.
 
-1. Open Android Studio
-2. Select **Open** and choose the directory containing this project
-3. Allow Android Studio to fix any incompatibilities as it imports the project.
-4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
-5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
-6. Run the app on an emulator or physical device
+The code, configuration, assets, and documentation contained in this repository do **not** represent the complete production version of the project. Certain components, services, configurations, and proprietary resources have been removed, modified, or replaced.
+
+The actual project repository is private and is not publicly accessible. As a result, this repository may not include all features, dependencies, infrastructure configurations, or deployment resources used in the live production environment.
+
+Please do not consider this repository to be the official or complete source code of the project.
