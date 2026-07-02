@@ -1,11 +1,23 @@
-# Notice
+# My Project Releases
 
-⚠️ **Important Notice**
+Welcome to my project releases repository! Here you will find the stable versions and binaries of my various personal projects.
 
-This repository is provided for demonstration, testing, and reference purposes only.
+## 🚀 Projects
+Below is a list of the projects hosted in this repository:
 
-The code, configuration, assets, and documentation contained in this repository do **not** represent the complete production version of the project. Certain components, services, configurations, and proprietary resources have been removed, modified, or replaced.
+| Project Name | Description | Link |
+| :--- | :--- | :--- |
+| **Project Name 1** | A brief one-line description of what this project does. | [View Project](#) |
+| **Project Name 2** | A brief one-line description of what this project does. | [View Project](#) |
 
-The actual project repository is private and is not publicly accessible. As a result, this repository may not include all features, dependencies, infrastructure configurations, or deployment resources used in the live production environment.
+## 🛠 How to Use
+- **Binaries:** You can download the latest compiled binaries from the [Releases](https://github.com/RukshanAmodya/Releases/releases) section.
+- **Source Code:** Each project has a link to its dedicated source repository where you can contribute or report issues.
 
-Please do not consider this repository to be the official or complete source code of the project.
+## 📋 License
+All projects in this repository are licensed under the [MIT License](LICENSE) unless otherwise specified in the individual project folders.
+
+## 📬 Contact
+If you have any questions or feedback, feel free to reach out:
+- **Email:** nmrr.amodya@gmail.com
+- **Twitter/LinkedIn:** @QuestraX
