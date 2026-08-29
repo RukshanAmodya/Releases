@@ -1,784 +1,606 @@
-# 📖 StudentManagementSystem.java — සිංහල Storytelling Documentation
+# 📖 StudentManagementSystem.java — සම්පූර්ණ සිංහල විස්තරය
 
-> **iCET Student Management System** — Java code එකේ ඇතුළේ වෙන දේ, story ගෙ flow ෙකෙ සිංහලෙන්
+> **iCET Student Management System** — Java කේතය (Code) ඇතුළත සිදුවන ක්‍රියාවලිය සිංහලෙන් සරලව පැහැදිලි කිරීම.
 
 ---
 
-## 🗃️ Data Store — ශිෂ්‍ය data ගබඩා කරන ආකාරය
+## 🗃️ දත්ත ගබඩා කිරීම (Data Storage)
 
-Program run වෙන්නට කලිනේ, class level ෙකෙ global arrays ගොඩාක් declare කෙරෙනවා. ඔය arrays ෙකෙ තමයි ශිෂ්‍යයන් ගේ data *in-memory* ෙකෙ store ෙව්නෙ — database file එකක් නෑ.
+මෙම ක්‍රමලේඛය (Program) ක්‍රියාත්මක වීමේදී, කිසිදු බාහිර දත්ත ගබඩාවක් (Database) හෝ ගොනුවක් (File) භාවිතා නොවේ. සියලුම සිසුන්ගේ දත්ත පරිගණක මතකය (RAM) තුළ පවත්වාගෙන යනු ලබන්නේ පහත දැක්වෙන පොදු අරා (Global Arrays) ලිස්තු පහ හරහාය.
 
 ```java
-public static String[] regNoArray  // Registration Numbers
-public static String[] nicArray    // NIC Numbers
-public static String[] nameArray   // Student Names
-public static int[]    prfArray    // PRF Marks
-public static int[]    dbmsArray   // DBMS Marks
+public static String[] regNoArray  // ලියාපදිංචි අංක (Registration Numbers)
+public static String[] nicArray    // ජාතික හැඳුනුම්පත් අංක (NIC Numbers)
+public static String[] nameArray   // සිසුන්ගේ නම් (Student Names)
+public static int[]    prfArray    // PRF විෂයට අදාළ ලකුණු (PRF Marks)
+public static int[]    dbmsArray   // DBMS විෂයට අදාළ ලකුණු (DBMS Marks)
 ```
 
-ශිෂ්‍ය data store ෙව්නෙ "parallel arrays" model ෙකෙ — `regNoArray[0]`, `nicArray[0]`, `nameArray[0]`, `prfArray[0]`, `dbmsArray[0]` කියන්නෙ ෙකෙනෙකුෙගෙ data. Index number same ෙකෙ ශිෂ්‍යයා ෙකෙනෙකෙ data ලිස්ටු 5ක ගෙ store ෙව්නවා.
+මෙම අරා පහම එකිනෙකට සමාන්තරව (Parallel Arrays) ක්‍රියා කරයි. උදාහරණයක් ලෙස, පළමු ශිෂ්‍යයාගේ ලියාපදිංචි අංකය `regNoArray[0]` හි ද, ඔහුගේ නම `nameArray[0]` හි ද, ලකුණු `prfArray[0]` හි ද වශයෙන් එකම දර්ශකය (Index 0) යටතේ ගබඩා වේ.
 
-**PRF/DBMS marks special values:**
-- `-1` → ශිෂ්‍යයා exam ෙකෙ absent ෙවෙලා
-- `-2` → exam conduct ෙකෙ නෑ (exam ෙකෙ නෑ)
-- `0–100` → actual marks
+**ලකුණු සඳහා වන විශේෂ අගයන් (Special Marks Values):**
+- `-1` → ශිෂ්‍යයා විභාගයට පෙනී සිට නොමැත (Absent).
+- `-2` → විභාගය පවත්වා නොමැත (Not conducted).
+- `0 සිට 100 දක්වා අගයන්` → විභාගයේදී ලබාගත් සැබෑ ලකුණු.
 
-**Batch arrays:**
+**කණ්ඩායම් දත්ත (Batch Data):**
 ```java
 public static int[] batchNameArray  = { 105, 106, 107, 108, 109, 110 };
 public static int[] batchStatusArray = { 0,   0,   0,   0,   1,   1  };
 ```
-`0 = CLOSED`, `1 = OPEN` — ෙදෙකොල arrays ෙකෙ index position ෙකෙ match ෙව්නවා.
+මෙහි `batchStatusArray` හි අගය `1` ක් නම් එම කණ්ඩායමට සිසුන් ඇතුළත් කරගත හැක (Open). `0` ක් නම් ඇතුළත් කරගත නොහැක (Closed).
 
 ---
 
-## 🔧 Method 01 — `clearConsole()`
+## 🔧 ක්‍රමවේද (Methods) සහ ඒවායේ තර්කනය (Logic)
+
+---
+
+### 1. `clearConsole()` — තිරය පිරිසිදු කිරීම
 
 ```java
 public final static void clearConsole()
 ```
 
-Program ෙකෙ screen clear ෙකෙරෙනෙකෙ කොහොමද? `clearConsole()` call ෙවෙනකොට, method ෙකෙ ප්‍රථමෙයෙන්ම `System.getProperty("os.name")` use කරලා **operating system ෙකෙ name** ගන්නවා. ෙසෙකෙ result string ෙකෙ `"Windows"` කියල ෙගෙනයද කියලා `.contains("Windows")` කියලා check ෙකෙරෙනවා.
+**භාවිතය:** පරිගණක තිරයේ (Console) ඇති පැරණි ප්‍රතිදානයන් (Outputs) මකා දමා තිරය පිරිසිදු කරයි.
 
-**Windows system ෙකෙ නං:** `new ProcessBuilder("cmd", "/c", "cls")` use කරලා console window clear command (CLS) run ෙකෙරෙනවා. `.inheritIO()` කියන්නෙ current Java process ෙකෙ Input/Output stream ෙකෙ use ෙව්නවා. `.start()` ෙකෙ process start ෙකෙරෙනවා, `.waitFor()` ෙකෙ process end ෙව්නෙ දක්ෙව් Java code wait ෙකෙරෙනවා.
-
-**Windows නොෙව් නං (Linux/Mac):** `System.out.print("\033[H\033[2J")` use ෙකෙරෙනවා — ෙමය ANSI escape code, terminal cursor ෙකෙ top-left ෙකෙ (H = Home) ගෙනල screen clear ෙකෙරෙනවා (2J = erase display). ෙඊලෙවෙ `System.out.flush()` call ෙව්නෙ buffer ෙකෙ print pending output flush ෙකෙරෙන්ෙන්.
-
-ෙකෙෙකෝ error ෙකෙකෙ ආෙව් නං `catch(Exception e)` block ෙකෙ `e.printStackTrace()` ෙකෙ error details console ෙකෙ print ෙකෙරෙනවා.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. ප්‍රථමයෙන් `System.getProperty("os.name")` මඟින් පරිගණකය ක්‍රියාත්මක වන මෙහෙයුම් පද්ධතියේ (OS) නම ලබා ගනී.
+2. මෙහෙයුම් පද්ධතියේ නමෙහි `"Windows"` යන වචනය අඩංගු දැයි (`.contains("Windows")`) පරීක්ෂා කරයි.
+   - **Windows නම්:** `new ProcessBuilder("cmd", "/c", "cls")` මඟින් Windows Command Prompt එක හරහා `cls` විධානය ක්‍රියාත්මක කරයි. `.inheritIO().start().waitFor()` යෙදීමෙන් එම ක්‍රියාවලිය සම්පූර්ණ වන තෙක් ක්‍රමලේඛය මඳකට නවතා තබයි.
+   - **Windows නොවේ නම් (Linux / Mac):** ANSI Escape Code එකක් වන `\033[H\033[2J` යන්න මුද්‍රණය කරයි. මෙයින් Cursor එක මුලටම ගෙන ගොස් මුළු තිරයම පිරිසිදු කරයි. අනතුරුව `System.out.flush()` මඟින් තිරය වහාම යාවත්කාලීන කරයි.
+3. මෙම ක්‍රියාවලියේදී කිසියම් දෝෂයක් (Exception) ඇතිවුවහොත්, එය `catch` බ්ලොක් එකෙන් හසුකරගෙන `e.printStackTrace()` මඟින් දෝෂ විස්තරය පෙන්වයි.
 
 ---
 
-## 🔧 Method 02 — `exit()`
+### 2. `exit()` — පද්ධතියෙන් ඉවත් වීම
 
 ```java
 public static void exit()
 ```
 
-User exit option select ෙකෙරෙනකොට, ෙමෙ method call ෙව්නවා. ෙප්‍ලාෙව්ෙල් `clearConsole()` ෙකෙ screen clear කෙරෙලා, ෙඊලෙවෙ `"You left the program..."` message ෙකෙ print ෙකෙරෙනවා. ෙසෙකෙ `System.exit(0)` call ෙව්නෙ — `0` argument ෙකෙ meaning program **successful exit** ෙකෙ (error ෙකෙ නොෙව්) program completely terminate ෙකෙරෙනවා.
+**භාවිතය:** ධාවනය වන ක්‍රමලේඛය සම්පූර්ණයෙන්ම නවතා දමා ඉවත් වේ.
+
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. `clearConsole()` ඇමතීමෙන් තිරය පිරිසිදු කරයි.
+2. `You left the program...` යන පණිවිඩය මුද්‍රණය කරයි.
+3. `System.exit(0)` විධානය මඟින් සමස්ත ජාවා ක්‍රියාවලියම වසා දමයි. මෙහි `0` අගයෙන් අදහස් වන්නේ කිසිදු දෝෂයකින් තොරව සාමාන්‍ය පරිදි පද්ධතිය වසා දැමූ බවයි.
 
 ---
 
-## 🔧 Method 03 — `getGPA(int marks)`
+### 3. `getGPA(int marks)` — GPA අගය සෙවීම
 
 ```java
 public static double getGPA(int marks)
 ```
 
-ෙමෙ method ෙකෙ ශිෂ්‍යයෙකෙ ලකු data argument ෙකෙ ලෙස receive ෙකෙරෙනවා. ෙප්‍ලාෙව්ෙල් if condition ෙකෙ `marks < 0` ෙකෙ check ෙකෙරෙනවා — marks negative ෙවෙලා ෙවෙලා නං (`-1` absent හෝ `-2` not conducted), GPA `0.0` ෙකෙ return ෙව්නවා.
+**භාවිතය:** ශිෂ්‍යයෙකු ලබාගත් ලකුණු ප්‍රමාණයට සාපේක්ෂව GPA අගය ගණනය කර ලබා දෙයි.
 
-ෙඊලෙවෙ cascading if-else chain ෙකෙ through ෙකෙ marks grade scale ෙකෙ compare ෙකෙරෙනවා — 90-100 range? `4.25`. 80-89 range? `4.00`. ෙමෙෙ ෙ pattern ෙකෙ continue ෙව්නවා. ෙකෙෙකෝ condition ෙකෙ match ෙකෙෙව් නං (ෙකෙ 20 ට ෙත් දිය මාෙල), last `return 0.00` execute ෙව්නවා.
-
-| ලකුණු | GPA | ලකුණු | GPA |
-|-------|-----|-------|-----|
-| 90-100 | 4.25 | 55-59 | 2.30 |
-| 80-89 | 4.00 | 50-54 | 2.00 |
-| 75-79 | 3.70 | 45-49 | 1.70 |
-| 70-74 | 3.30 | 40-44 | 1.30 |
-| 65-69 | 3.00 | 30-39 | 1.00 |
-| 60-64 | 2.70 | 20-29 | 0.70 |
-| < 20 | 0.00 | < 0 | 0.00 |
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. ලකුණු බින්දුවට වඩා අඩු නම් (`marks < 0`), එනම් ශිෂ්‍යයා විභාගයට පෙනී සිට නැතිනම් (`-1`) හෝ විභාගය පවත්වා නැතිනම් (`-2`), සෘජුවම `0.0` අගය ආපසු හරවා යවයි (Return).
+2. ඉන්පසුව, පහළට ගලා යන `if-else` කොන්දේසි මාලාවක් (Cascading Conditions) මඟින් ලකුණු පරාසයන් පරීක්ෂා කරයි:
+   - ලකුණු 90 ත් 100 ත් අතර නම් → `4.25`
+   - ලකුණු 80 ත් 89 ත් අතර නම් → `4.00`
+   - ලකුණු 75 ත් 79 ත් අතර නම් → `3.70`
+   - (මෙලෙස ක්‍රමයෙන් පහළට යමින් අවසානයේ ලකුණු 20 ට වඩා අඩු අගයන් සඳහා `0.0` ලබා දෙයි.)
 
 ---
 
-## 🔧 Method 04 — `formatMarks(int marks)`
+### 4. `formatMarks(int marks)` — ලකුණු හැඩගැන්වීම
 
 ```java
 public static String formatMarks(int marks)
 ```
 
-ෙමෙ method ෙකෙ purpose ෙකෙ simple — ශිෂ්‍යයෙකෙ marks value ෙකෙ user ෙකෙ readable ෙකෙ display ෙකෙරෙනෙකෙ convert ෙකෙරෙනවා. `marks == -1` ෙකෙ check ෙකෙරෙනවා — absent ෙකෙ ෙව්නෙ `"Absent"` return. `marks == -2` ෙකෙ නං `"Not conducted"` return. ෙකොෙකෙ condition ෙකෙ match ෙකෙෙව් නං සාමාන්‍ය number ෙකෙ — `String.valueOf(marks)` ෙකෙ int ෙකෙ String ෙකෙ convert ෙකෙරෙලා return ෙව්නවා.
+**භාවිතය:** ලකුණු අරා තුළ ඇති සෘණ අගයන් පද්ධතිය භාවිතා කරන්නාට තේරුම් ගත හැකි වචන බවට පරිවර්තනය කරයි.
+
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+- ලකුණ `-1` නම්, `"Absent"` (පැමිණ නැත) යන වචනය ද,
+- ලකුණ `-2` නම්, `"Not conducted"` (පවත්වා නැත) යන වචනය ද,
+- වෙනත් ඕනෑම ධන ලකුණක් සඳහා, එම ලකුණු සංඛ්‍යාව String එකක් ලෙස ද (`String.valueOf(marks)`) ආපසු හරවා යවයි.
 
 ---
 
-## 🔧 Method 05 — `findStudentIndex(String regNo)`
+### 5. `findStudentIndex(String regNo)` — ලියාපදිංචි අංකයෙන් ශිෂ්‍යයා සිටින ස්ථානය සෙවීම
 
 ```java
 public static int findStudentIndex(String regNo)
 ```
 
-Registration Number ෙකෙ use කෙරෙලා ශිෂ්‍යයා ෙකෙනෙකෙ system ෙකෙ ෙකෙ index ෙකෙ ෙවෙලාද කියල ෙහෙලෙනෙකෙ ෙමෙ method ෙකෙ කරනවා.
+**භාවිතය:** ලබාදෙන ලියාපදිංචි අංකයට අදාළ ශිෂ්‍යයා දත්ත අරාවන්හි කුමන ස්ථානයක (Index) සිටීදැයි සොයා දෙයි.
 
-**ෙකෙෙ ආකාරෙයෙ ෙකෙරෙනවාද:** `regNoArray` ෙකෙ ෙකෙ element ෙකෙ ෙකෙ loop ෙකෙ `i = 0` ෙසිෙ start ෙකෙෙව්, array end (`regNoArray.length`) ෙදෙකෙ loop run ෙව්නවා. Loop ෙකෙ ෙකෙ iteration ෙකෙ `regNoArray[i].equalsIgnoreCase(regNo)` ෙකෙ compare ෙකෙරෙනවා. `equalsIgnoreCase` use ෙකෙරෙනෙකෙ "pr24105001" ෙකෙෙ "PR24105001" ෙකෙ same ෙකෙ treat ෙකෙෙ — case sensitivity problem ෙකෙ නෑ.
-
-Match ෙකෙෙව් නං that iteration ෙකෙ `i` value ෙකෙ `return i` ෙකෙ method ෙකෙ exit ෙකෙෙව් ෙහ ෙ index return ෙව්නවා. Loop ෙකෙ end ෙදෙකෙ ෙගෙෙය නං ශිෂ්‍යයා ෙකෙ system ෙකෙ ෙකෙෙව් නෑ — `return -1` execute ෙව්නවා, ෙකෙ -1 ෙකෙ "not found" signal ෙකෙ.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. `regNoArray` අරාවේ මුල සිට අග දක්වා (`i = 0` සිට `regNoArray.length` දක්වා) `for` ලූපයක් ධාවනය කරයි.
+2. සෑම වටයකදීම (Iteration), අරාවේ ඇති අගය සහ පරිශීලකයා සෙවූ අගය සමානදැයි `regNoArray[i].equalsIgnoreCase(regNo)` මඟින් පරීක්ෂා කරයි. `equalsIgnoreCase` භාවිතා කරන නිසා ඉංග්‍රීසි අකුරු කැපිටල් හෝ සිම්පල් වීම බලපාන්නේ නැත.
+3. ගැලපෙන අගයක් හමු වූ සැනින්, එම වටයේ දර්ශක අංකය (`i`) ආපසු හරවා යවමින් ක්‍රමවේදයෙන් ඉවත් වේ.
+4. මුළු ලූපයම අවසන් වන තෙක් ගැලපෙන අගයක් හමු නොවුණහොත්, එවැනි ශිෂ්‍යයෙකු දත්ත පද්ධතියේ නොමැති බව හැඟවීම සඳහා `-1` අගය ආපසු හරවා යවයි.
 
 ---
 
-## 🔧 Method 06 — `findStudentIndexByNIC(String nic)`
+### 6. `findStudentIndexByNIC(String nic)` — හැඳුනුම්පත් අංකයෙන් ශිෂ්‍යයා සිටින ස්ථානය සෙවීම
 
 ```java
 public static int findStudentIndexByNIC(String nic)
 ```
 
-ෙෙ method ෙකෙ logic ෙකෙ `findStudentIndex()` ෙකෙ හරිෙයෙෙ same — ෙකෙෙ වෙනෙස ෙකෙ `regNoArray` ෙකෙ ෙව' `nicArray` ෙකෙ loop ෙකෙරෙෙ, ෙෙ `equalsIgnoreCase()` ෙකෙ ෙව' `equals()` use ෙෙෙනෙවෙ. NIC ෙෙෙ case-sensitive ෙෙෙෙ `equals()` ෙෙෙෙ.
+**භාවිතය:** ලබාදෙන ජාතික හැඳුනුම්පත් අංකයට (NIC) අදාළ ශිෂ්‍යයා දත්ත අරාවන්හි සිටින ස්ථානය සොයයි.
 
-Match ෙෙෙෙ නං index return, ෙෙෙෙෙ නං `-1` return.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+මෙය ද `findStudentIndex` ක්‍රමවේදය හා සමාන වන අතර, වෙනස වන්නේ මෙහිදී `nicArray` පරීක්ෂා කිරීම සහ අකුරු සැසඳීම සඳහා `equals()` (Case-sensitive) ක්‍රමවේදය භාවිතා කිරීම පමණි. ගැලපීමක් නැත්නම් `-1` ලබා දෙයි.
 
 ---
 
-## 🔧 Method 07 — `checkBadgeStatus(int batchNum)`
+### 7. `checkBadgeStatus(int batchNum)` — කණ්ඩායමේ තත්ත්වය පරීක්ෂා කිරීම
 
 ```java
 public static int checkBadgeStatus(int batchNum)
 ```
 
-ශිෂ්‍යයෙෙ add ෙෙෙෙෙ batch ෙෙෙ enrollment open ෙෙෙෙ? ෙෙෙ method ෙෙෙ ෙෙෙ ෙෙෙෙෙ.
+**භාවිතය:** යම් කණ්ඩායම් (Batch) අංකයක් ලබා දුන් විට, එම කණ්ඩායම පද්ධතිය තුළ පවතීද සහ එහි ලියාපදිංචිය විවෘතදැයි පරීක්ෂා කරයි.
 
-`batchNameArray` ෙෙෙ for loop ෙෙෙ iterate ෙෙෙෙෙ. Loop ෙෙෙ ෙෙ iteration ෙෙෙ `batchNameArray[i] == batchNum` compare ෙෙෙෙෙ — ෙෙ match ෙෙෙ? ෙෙෙෙ `return batchStatusArray[i]` ෙෙෙ execute ෙෙෙෙෙ, **ෙෙ same index ෙෙෙ batch ෙෙෙ status value** (0 ෙෙ 1) return ෙෙෙෙෙ.
-
-Loop ෙෙෙ end ෙෙෙෙ ෙෙෙෙ ෙෙෙ batch ෙෙෙ system ෙෙෙ ෙෙ නෙ — `return -1` execute ෙෙෙෙෙ ෙෙෙ "batch ෙෙ නෙ" signal ෙෙෙෙෙ.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. `batchNameArray` අරාව `for` ලූපයක් ආධාරයෙන් පරීක්ෂා කරයි.
+2. ලබා දුන් අංකය එහි ඇති අගයකට සමාන වුවහොත්, එම ස්ථානයටම අදාළව `batchStatusArray` හි ඇති අගය (විවෘත නම් `1`, වැසී ඇත්නම් `0`) ලබා දෙයි.
+3. කණ්ඩායම් අංකය සොයාගත නොහැකි වුවහොත් `-1` අගය ලබා දෙයි.
 
 ---
 
-## 🔧 Method 08 — `isDuplicateNIC(String nic)`
+### 8. `isDuplicateNIC(String nic)` — හැඳුනුම්පත් අංකය දෙවරක් ඇතුළත් වී ඇත්දැයි බැලීම
 
 ```java
 public static boolean isDuplicateNIC(String nic)
 ```
 
-NIC already system ෙෙෙ ෙෙෙෙෙෙ? ෙෙෙ ෙෙ simple wrapper logic ෙෙෙ. `findStudentIndexByNIC(nic)` call ෙෙෙෙෙ — ෙෙෙ result ෙෙ index number ෙෙ `-1` ෙෙ ෙෙෙෙෙ. ෙෙ `!= -1` ෙෙ check ෙෙෙෙෙ — `-1` ෙෙ නෙ නං student exist ෙෙෙ, ෙෙෙෙ `true` return. `-1` නං student ෙෙ නෙ, ෙෙෙෙ `false` return.
+**භාවිතය:** එකම හැඳුනුම්පත් අංකයෙන් සිසුන් දෙදෙනෙකු ලියාපදිංචි වීම වැළැක්වීම සඳහා මෙම පරීක්ෂාව සිදු කරයි.
+
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+`findStudentIndexByNIC(nic)` ක්‍රමවේදය අමතයි. එහි ප්‍රතිඵලය `-1` ට සමාන නොවේ නම් (එනම් 0 හෝ ඊට වැඩි දර්ශක අංකයක් ලැබුණහොත්), එම හැඳුනුම්පත් අංකය දැනටමත් පද්ධතියේ පවතින බැවින් `true` ලබා දෙයි. නැතහොත් `false` ලබා දෙයි.
 
 ---
 
-## 🔧 Method 09 — `checkNIC(String nic)`
+### 9. `checkNIC(String nic)` — NIC පරීක්ෂාව
 
 ```java
 public static boolean checkNIC(String nic)
 ```
 
-ෙෙෙ method ෙෙෙ `isDuplicateNIC(nic)` call ෙෙෙෙ result directly return ෙෙෙෙෙ. Wrapper/alias method ෙෙෙ — ෙකෙෙ new logic ෙෙ නෙ.
+**භාවිතය:** මෙය `isDuplicateNIC(nic)` ක්‍රමවේදයටම බාහිරින් සම්බන්ධ කර ඇති තවත් ක්‍රමවේදයකි (Wrapper Method). එය සෘජුවම එම ක්‍රමවේදය ක්‍රියාත්මක කර ප්‍රතිඵලය ලබා දෙයි.
 
 ---
 
-## 🔧 Method 10 — `getStudentCountForBatch(int batchNumber)`
+### 10. `getStudentCountForBatch(int batchNumber)` — කණ්ඩායමක සිටින සිසුන් ගණන සෙවීම
 
 ```java
 public static int getStudentCountForBatch(int batchNumber)
 ```
 
-ෙෙ batch ෙෙෙ ශිෂ්‍ය ෙෙෙෙ ෙෙෙෙෙ? ෙෙෙ method ෙෙෙ counter variable (`count = 0`) ෙෙෙ ෙෙ.
+**භාවිතය:** කිසියම් කණ්ඩායම් අංකයකට (උදා: 105) අදාළව දැනට පද්ධතියේ ලියාපදිංචි වී සිටින මුළු සිසුන් සංඛ්‍යාව ගණනය කරයි.
 
-**Registration Number format:** `PR24105001` → ෙෙෙ structure ෙෙෙ `[PR/OR][24][BatchNum][Seq]`. Batch number ෙෙෙ index 4 ෙෙ 7 ෙෙෙෙ ෙෙෙෙෙ: `regNo.substring(4, 7)` ෙෙෙ `"105"` ෙෙෙෙෙ.
-
-`regNoArray` ෙෙෙ for-each loop ෙෙෙ iterate ෙෙෙෙෙ. ෙෙ registration number ෙෙෙ:
-- `regNo.length() >= 7` ෙෙෙ check ෙෙෙෙෙ — substring crash ෙෙෙ safety check
-- `.substring(4, 7).equals(batchStr)` ෙෙෙ batch ෙෙෙ match ෙෙෙෙෙ
-
-Match ෙෙෙ? `count++`. Loop end ෙෙෙ total count return ෙෙෙෙෙ.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. ගණන් කිරීම සඳහා `count = 0` ලෙස විචල්‍යයක් (Variable) සාදා ගනී.
+2. කණ්ඩායම් අංකය String අගයක් බවට පරිවර්තනය කරයි (උදා: `"105"`).
+3. `regNoArray` හි ඇති සියලුම ලියාපදිංචි අංක `for-each` ලූපයකින් එකින් එක පරීක්ෂා කරයි.
+   - ලියාපදිංචි අංකයේ දිග අකුරු 7කට වඩා වැඩිදැයි මුලින්ම බලයි (Sub-string දෝෂ මඟහරවා ගැනීමට).
+   - ලියාපදිංචි අංකයක මැද කොටසින් කණ්ඩායම නිරූපණය වේ (උදා: `PR24105001` හි `105` ඇත්තේ දර්ශක 4 සිට 7 දක්වාය). එබැවින් `.substring(4, 7)` කොටස ලබාගෙන එය සොයන කණ්ඩායම් අංකයට සමාන දැයි පරීක්ෂා කරයි.
+4. සමාන නම් `count` අගය 1 කින් වැඩි කරයි.
+5. අවසානයේ මුළු එකතුව ආපසු ලබා දෙයි.
 
 ---
 
-## 🔧 Method 11 — `generateStudentID(int batchNumber, boolean isPhysical)`
+### 11. `generateStudentID(int batchNumber, boolean isPhysical)` — නව ලියාපදිංචි අංකයක් සෑදීම
 
 ```java
 public static String generateStudentID(int batchNumber, boolean isPhysical)
 ```
 
-නව ශිෂ්‍යයෙෙ unique Registration Number generate ෙෙෙෙෙ ෙෙෙ method ෙෙෙ.
+**භාවිතය:** අලුතින් එක්වන ශිෂ්‍යයා සඳහා ස්වයංක්‍රීයව අනුක්‍රමිකව ඊළඟට එන අනන්‍ය ලියාපදිංචි අංකය (Reg No) නිර්මාණය කරයි.
 
-**Step 1 — Max Sequence ෙෙෙෙෙ:**
-`maxSeq = 0` ෙෙෙ initialize ෙෙෙෙ. `regNoArray` ෙෙෙ loop ෙෙෙෙෙ. ෙෙ iteration ෙෙෙ:
-- `regNo.length() == 10` ෙෙෙ check — format valid?
-- `regNo.substring(4, 7).equals(batchStr)` — correct batch?
-- ෙෙෙෙ `regNo.substring(7)` ෙෙෙ last 3 characters ගෙෙ → `Integer.parseInt()` ෙෙෙ int ෙෙෙ convert ෙෙෙෙෙ
-- ෙෙෙ `seq > maxSeq` ෙෙෙ? ෙෙෙෙ `maxSeq = seq` update
-
-**Step 2 — Next Sequence:**
-`nextSeq = maxSeq + 1` — ෙෙෙෙෙ ෙෙෙ ෙෙ seq ෙෙෙ ෙෙෙෙ
-
-**Step 3 — Prefix:**
-```java
-String prefix = isPhysical ? "PR" : "OR";
-```
-`isPhysical` true ෙෙෙ? → `"PR"`. False ෙෙෙ? → `"OR"`.
-
-**Step 4 — Final ID:**
-```java
-return prefix + "24" + batchStr + String.format("%03d", nextSeq);
-```
-`%03d` ෙෙෙ sequence number ෙෙෙ 3 digits ෙෙෙ zero-pad ෙෙෙෙෙ — `1` → `"001"`, `26` → `"026"`.
-
-ෙෙෙෙෙ `PR24110026` ෙෙෙෙෙ result.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. දැනට එම කණ්ඩායමේ සිටින උපරිම අනුක්‍රමික අංකය (Max Sequence) සෙවීම සඳහා `maxSeq = 0` ලෙස ආරම්භ කරයි.
+2. මුළු ලියාපදිංචි අංක ලිස්තුවම පරීක්ෂා කර, අදාළ කණ්ඩායමට අයත් අංකවල අවසන් ඉලක්කම් 3 (උදා: `PR24105025` හි `025` කොටස) `Integer.parseInt()` මඟින් සංඛ්‍යාවක් බවට හරවා ගනී.
+3. එම අංකය `maxSeq` ට වඩා විශාල නම්, `maxSeq` අගය එම නව අංකයෙන් යාවත්කාලීන කරයි.
+4. උපරිම අංකය සොයාගත් පසු ඊළඟ අංකය ලෙස `nextSeq = maxSeq + 1` ලබා ගනී.
+5. ශිෂ්‍යයා සහභාගි වන්නේ Physical පන්තියටද Online පන්තියටද යන්න මත ඉදිරි උපසර්ගය (Prefix) තීරණය කරයි. Physical නම් `"PR"` ද, Online නම් `"OR"` ද වේ.
+6. අවසානයේ `String.format("%03d", nextSeq)` භාවිතයෙන් අංකය ඉලක්කම් තුනක ආකෘතියකට සකසා (උදා: `5` යන්න `005` ලෙස) සම්පූර්ණ අංකය සාදයි (උදා: `PR` + `24` + `105` + `026` = `PR24105026`).
 
 ---
 
-## 🔧 Method 12 — `addStudentToArray(...)`
+### 12. `addStudentToArray(...)` — සිසුන්ගේ දත්ත අරාවන්ට එකතු කිරීම
 
 ```java
 public static void addStudentToArray(String regNo, String nic, String name, int prf, int dbms)
 ```
 
-Java arrays ෙෙෙ size runtime ෙෙෙ change ෙෙෙ ෙෙ — ෙෙෙෙෙ ෙෙෙ array ෙෙෙ element add ෙෙෙෙෙ manual resize technique ෙෙෙ.
+**භාවිතය:** සාදන ලද නව ශිෂ්‍යයාගේ සියලුම තොරතුරු පොදු අරා පහටම ඇතුළත් කරයි.
 
-**ෙෙ array ෙෙෙ (5 arrays ෙෙෙ ෙෙෙ process ෙෙෙ same):**
-
-1. `new String[regNoArray.length + 1]` — ෙෙෙෙෙ ෙෙෙ ෙෙ new array ෙෙෙ
-2. `System.arraycopy(regNoArray, 0, newRegNoArray, 0, regNoArray.length)` — old array ෙෙෙ data ෙෙෙෙ copy ෙෙෙෙෙ
-   - `src = regNoArray` (ෙෙෙෙ)
-   - `srcPos = 0` (ෙෙෙෙෙ index ෙෙෙ)
-   - `dest = newRegNoArray` (ෙෙෙෙ)
-   - `destPos = 0` (paste ෙෙෙ start index)
-   - `length = regNoArray.length` (ෙෙෙෙෙ elements ෙෙෙ)
-3. `newRegNoArray[regNoArray.length] = regNo` — new student ෙෙෙ data ෙෙෙෙ (last slot ෙෙෙ)
-4. `regNoArray = newRegNoArray` — global variable ෙෙෙ new array ෙෙෙ point ෙෙෙෙෙ
-
-ෙෙ process `nicArray`, `nameArray`, `prfArray`, `dbmsArray` ෙෙෙ ෙෙ repeat ෙෙෙෙෙ.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+ජාවා හි සාමාන්‍ය අරාවක (Array) ප්‍රමාණය පසුව වෙනස් කළ නොහැක. එබැවින් මෙම ක්‍රමවේදය මඟින් පහත පියවර සිදු කරයි:
+1. දැනට පවතින අරාවේ ප්‍රමාණයට වඩා 1 ක් විශාල වන පරිදි නව තාවකාලික අරාවක් සාදයි (උදා: `new String[regNoArray.length + 1]`).
+2. `System.arraycopy()` මඟින් පැරණි අරාවේ තිබූ සියලුම දත්ත නව අරාවට පිටපත් කරයි.
+3. නව අරාවේ අවසන් හිස් තැනට (Index) අලුත් ශිෂ්‍යයාගේ දත්තය ඇතුළත් කරයි.
+4. පොදු අරාව (Global Array Variable) නව අරාවට යොමු (Point) කරයි.
+*(මෙම ක්‍රියාවලිය අරා පහ සඳහාම සිදු කරනු ලබයි).*
 
 ---
 
-## 🔧 Method 13 — `deleteStudentFromArray(int index)`
+### 13. `deleteStudentFromArray(int index)` — අරාවෙන් ශිෂ්‍යයෙකු ඉවත් කිරීම
 
 ```java
 public static void deleteStudentFromArray(int index)
 ```
 
-ෙෙෙ method ෙෙෙ index-based delete technique ෙෙෙ use ෙෙෙෙෙ. `length - 1` size arrays 5ක් නව ෙෙෙ හදෙෙෙෙෙ.
+**භාවිතය:** දෙන ලද දර්ශක අංකයට (Index) අදාළ ශිෂ්‍යයාගේ දත්ත පද්ධතියෙන් සම්පූර්ණයෙන්ම ඉවත් කරයි.
 
-`target = 0` variable ෙෙෙ initialize ෙෙෙෙෙ. ෙෙෙ original array ෙෙෙ `i` ෙෙ `0` ෙෙ `regNoArray.length` ෙෙෙෙෙ iterate ෙෙෙෙෙ:
-
-```java
-if (i == index) continue;  // ෙෙ row ෙෙෙ skip!
-newRegNoArray[target] = regNoArray[i];
-// ... (other arrays too)
-target++;
-```
-
-Delete ෙෙෙෙ index ෙෙෙ ෙෙ `i == index` ෙෙෙ `continue` ෙෙෙ ෙෙ iteration ෙෙෙ skip ෙෙෙෙෙ — copy ෙෙෙ ෙෙ නෙ. ෙෙෙෙ ෙෙෙ data automatically ෙෙෙෙෙ gap ෙෙ ෙෙෙෙ `target` index ෙෙෙ fill ෙෙෙෙෙ. Loop end ෙෙෙෙ global arrays ෙෙෙ update ෙෙෙෙෙ.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. පවතින ප්‍රමාණයට වඩා 1 ක් අඩු වන පරිදි නව අරා පහක් නිර්මාණය කරයි.
+2. තොරතුරු පිටපත් කිරීම සඳහා `target = 0` ලෙස නව දර්ශකයක් තබා ගනී.
+3. `for` ලූපයක් මඟින් පැරණි අරාවන්හි මුල සිට අගට යයි.
+4. එහිදී, වත්මන් දර්ශකය ඉවත් කළ යුතු දර්ශකයට සමාන නම් (`i == index`), `continue` විධානය මඟින් එම වටය මඟ හැර (Skip) යයි.
+5. අනෙක් සියලුම දත්ත නව අරා වෙත පිටපත් කරන අතර, පිටපත් කරන සෑම වරකම `target` අගය 1 කින් වැඩි කරයි.
+6. අවසානයේ පොදු අරා සියල්ල අලුත් අරාවලට යොමු කරයි.
 
 ---
 
-## 🔧 Method 14 — `addBatchToArray(int batchNumber)`
+### 14. `addBatchToArray(int batchNumber)` — නව කණ්ඩායමක් ඇතුළත් කිරීම
 
 ```java
 public static void addBatchToArray(int batchNumber)
 ```
 
-`addStudentToArray()` ෙෙෙ same technique — `length + 1` arrays ෙෙෙ, old data copy, new batch number append. `batchStatusArray` ෙෙෙ new batch ෙෙෙ `1` (ENROLLMENTOPEN) default ෙෙෙ add ෙෙෙෙෙ.
+**භාවිතය:** නව කණ්ඩායම් අංකයක් පද්ධතියට එක් කරයි.
+
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+`addStudentToArray` හි ක්‍රියාවලියට සමානව `batchNameArray` හි ප්‍රමාණය 1 කින් වැඩි කර නව කණ්ඩායම් අංකය එක් කරයි. එමෙන්ම, `batchStatusArray` ට ද අලුත් අගයක් එක් කර එහි ලියාපදිංචි තත්ත්වය ස්වයංක්‍රීයව විවෘත (`1` - Open) ලෙස සටහන් කරයි.
 
 ---
 
-## 🔧 Method 15 — `homePage()`
+### 15. `homePage()` — ප්‍රධාන මෙනුව
 
 ```java
 public static void homePage()
 ```
 
-Program start ෙෙෙෙෙ main menu display ෙෙෙෙෙ. `do { ... } while (true)` loop ෙෙෙ use ෙෙෙෙෙ — ෙෙ user exit option select ෙෙෙෙෙ ෙෙෙෙෙ loop ෙෙ ෙෙෙෙෙ.
+**භාවිතය:** පරිශීලකයාට පද්ධතිය සමඟ ගනුදෙනු කිරීමට අවශ්‍ය ප්‍රධාන මෙනුව දර්ශනය කරයි.
 
-Loop ෙෙෙ ෙෙ iteration ෙෙෙ:
-1. `clearConsole()` ෙෙෙ screen refresh ෙෙෙෙෙ
-2. Main menu print ෙෙෙෙෙ
-3. `input.nextInt()` ෙෙෙ user ෙෙෙ choice wait ෙෙෙෙෙ
-4. `switch(option)` ෙෙෙ choice ෙෙ match ෙෙෙ case ෙෙෙ execute:
-   - `case 1` → `studentManagement()`
-   - `case 2` → `batchManagement()`
-   - `case 3` → `gradeManagement()`
-   - `case 4` → `reportGenerator()`
-   - `case 5` → `exit()`
-5. Sub-method return ෙෙෙෙ loop ෙෙෙෙෙ, menu ෙෙෙ refresh ෙෙෙෙෙ
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. `do-while (true)` ලූපයක් භාවිතයෙන් ක්‍රමලේඛය අඛණ්ඩව ධාවනය කරවයි.
+2. සෑම වටයකදීම තිරය පිරිසිදු කර ප්‍රධාන විකල්ප 5 මුද්‍රණය කරයි:
+   - [1] ශිෂ්‍ය කළමනාකරණය (Student Management)
+   - [2] කණ්ඩායම් කළමනාකරණය (Batch Management)
+   - [3] ලකුණු කළමනාකරණය (Grade Management)
+   - [4] වාර්තා සකස් කිරීම (Report Generator)
+   - [5] පද්ධතියෙන් පිටවීම (Exit)
+3. පරිශීලකයා ඇතුළත් කරන අංකය අනුව `switch-case` භාවිතයෙන් අදාළ උප-මෙනු ක්‍රමවේදය අමතයි.
 
 ---
 
-## 🔧 Method 16 — `studentManagement()`
+### 16. `studentManagement()` — ශිෂ්‍ය කළමනාකරණ මෙනුව
 
 ```java
 public static void studentManagement()
 ```
 
-Student Management sub-menu ෙෙෙ, `homePage()` ෙෙෙ exact same `do-while(true)` pattern. වෙෙෙස ෙෙෙ `case 5` ෙෙෙ `exit()` ෙෙ `return` ෙෙෙ — ෙෙ `return` ෙෙෙ ෙෙෙ method ෙෙෙ exit ෙෙෙෙ, `homePage()` ෙෙෙ control ෙෙෙෙෙ.
+**භාවිතය:** සිසුන් ඇතුළත් කිරීම, යාවත්කාලීන කිරීම, තොරතුරු බැලීම සහ ඉවත් කිරීම සඳහා වන උප මෙනුවයි.
+
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+`homePage()` හි ක්‍රියාකාරීත්වයට සමානව `do-while` ලූපයක් සහ `switch-case` ව්‍යුහයක් භාවිතයෙන් ක්‍රියා කරයි. මෙහි 5 වන විකල්පය තෝරාගත් විට `return` විධානය මඟින් මෙම ක්‍රමවේදයෙන් ඉවත් වී නැවත ප්‍රධාන මෙනුව වෙත ගමන් කරයි.
 
 ---
 
-## 🔧 Method 17 — `addStudent()`
+### 17. `addStudent()` — ශිෂ්‍යයෙකු ඇතුළත් කිරීමේ තිරය
 
 ```java
 public static void addStudent()
 ```
 
-ෙෙ method ෙෙෙ multiple validation layers ෙෙෙ through ෙෙෙෙ ශිෂ්‍යයෙෙ add ෙෙෙෙෙ.
+**භාවිතය:** නව ශිෂ්‍යයෙකු පද්ධතියට ලියාපදිංචි කිරීමේ සම්පූර්ණ ක්‍රියාවලිය මෙහෙයවයි.
 
-**Layer 1 — Batch Validation:**
-User ෙෙෙ batch number ෙෙෙෙ. `checkBadgeStatus(inputBadge)` ෙෙෙ result `status` ෙෙෙ store ෙෙෙෙෙ.
-
-- `status == -1` → batch ෙෙ නෙ. Error print ෙෙෙෙෙ, Y/N choice ෙෙෙෙෙ. "N" ෙෙෙ `return` ෙෙෙ method exit. "Y" ෙෙෙ `continue` ෙෙෙ loop restart.
-- `status == ENROLLMENTCLOSED (0)` → enrollment closed. ෙෙෙ same Y/N pattern.
-
-**Layer 2 — NIC Duplicate Check:**
-`isDuplicateNIC(nic)` ෙෙෙ `true` return ෙෙෙ? Existing student ෙෙෙ data (`regNoArray[existingIdx]`, `nameArray[existingIdx]`, `nicArray[existingIdx]`) print ෙෙෙෙෙ. Y/N choice.
-
-**Layer 3 — Data Input:**
-```java
-scanner.nextLine(); // Buffer flush — nextInt() ෙෙෙ leftover newline clear
-String name = scanner.nextLine(); // Full name with spaces
-int mode = scanner.nextInt(); // 1=Physical, 0=Online
-boolean isPhysical = (mode == 1);
-```
-
-**Layer 4 — ID Generate & Store:**
-`generateStudentID(inputBadge, isPhysical)` ෙෙෙ call ෙෙෙෙෙ, result `regNo` ෙෙෙ store. ෙෙෙ `addStudentToArray(regNo, nic, name, -2, -2)` ෙෙෙ call ෙෙෙෙෙ — `prf = -2`, `dbms = -2` ෙෙෙ default, ෙෙෙෙෙ exam conduct ෙෙ ෙෙ.
-
-Generated Reg No print ෙෙෙ success message.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. පරිශීලකයාගෙන් කණ්ඩායම් අංකය ලබා ගනී.
+2. `checkBadgeStatus()` මඟින් එම කණ්ඩායම පවතීද සහ එහි ලියාපදිංචිය විවෘතදැයි බලයි. වැසී ඇත්නම් හෝ කණ්ඩායම නැත්නම් දෝෂ පණිවිඩයක් පෙන්වා නැවත උත්සාහ කිරීමට විමසයි.
+3. ශිෂ්‍යයාගේ ජාතික හැඳුනුම්පත් අංකය ලබා ගනී.
+4. `isDuplicateNIC()` මඟින් එම හැඳුනුම්පත දැනටමත් ලියාපදිංචි වී ඇත්දැයි පරීක්ෂා කරයි. ලියාපදිංචි වී ඇත්නම්, එම ශිෂ්‍යයාගේ තොරතුරු පෙන්වා ක්‍රියාවලිය නවත්වයි.
+5. ශිෂ්‍යයාගේ නම සහ දේශනවලට සහභාගී වන ක්‍රමය (Physical / Online) ලබා ගනී.
+6. `generateStudentID()` මඟින් නව ලියාපදිංචි අංකයක් සාදා ගනී.
+7. `addStudentToArray()` මඟින් දත්ත අරාවට එක් කරයි. මෙහිදී ලකුණු සඳහා තවම විභාග පවත්වා නැති බව හැඟවීමට `-2` අගය ලබා දෙයි.
 
 ---
 
-## 🔧 Method 18 — `updateStudent()`
+### 18. `updateStudent()` — ශිෂ්‍ය තොරතුරු යාවත්කාලීන කිරීම
 
 ```java
 public static void updateStudent()
 ```
 
-Reg No input ෙෙෙෙෙ, `findStudentIndex(regNo)` ෙෙෙ student ෙෙෙෙෙ.
+**භාවිතය:** ශිෂ්‍යයෙකුගේ නම හෝ හැඳුනුම්පත් අංකය වෙනස් කිරීමට ඉඩ ලබා දෙයි.
 
-`idx == -1` ෙෙෙ? Student not found — retry loop.
-
-Student found ෙෙෙෙ current Name ෙෙ NIC display. ෙෙෙ update option:
-
-**Option 1 — Name Update:**
-`scanner.nextLine()` ෙෙෙ buffer flush ෙෙෙෙ. New name input. `nameArray[idx] = newName` — directly array ෙෙෙ element update ෙෙෙෙෙ.
-
-**Option 2 — NIC Update:**
-New NIC input ෙෙෙෙ. ෙෙෙ ෙෙෙ condition check:
-
-```java
-if (isDuplicateNIC(newNIC) && !newNIC.equals(nicArray[idx]))
-```
-
-`isDuplicateNIC(newNIC)` true ෙෙෙ AND ෙෙ new NIC ෙෙෙ same student ෙෙෙ current NIC ෙෙ DIFFERENT ෙෙෙ → ෙෙෙෙ someone else ෙෙෙ NIC ෙෙ — error. `!newNIC.equals(nicArray[idx])` condition ෙෙෙ ෙෙෙ student ෙෙෙ same NIC ෙෙෙ enter ෙෙෙෙ false block skip ෙෙෙෙ (update ok).
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. ලියාපදිංචි අංකය ලබාගෙන `findStudentIndex()` මඟින් ශිෂ්‍යයා සිටින ස්ථානය සොයයි. ශිෂ්‍යයා නැත්නම් දෝෂ පණිවිඩයක් පෙන්වයි.
+2. ශිෂ්‍යයා සිටී නම්, වෙනස් කළ යුත්තේ නමද හැඳුනුම්පතද යන්න විමසයි.
+   - **නම වෙනස් කරන්නේ නම්:** නව නම ලබාගෙන සෘජුවම `nameArray[idx] = newName` ලෙස යාවත්කාලීන කරයි.
+   - **හැඳුනුම්පත වෙනස් කරන්නේ නම්:** නව හැඳුනුම්පත් අංකය ලබාගෙන, එය වෙනත් අයෙකු භාවිතා කරන්නේ දැයි පරීක්ෂා කරයි. වෙනත් අයෙකු භාවිතා නොකරයි නම් පමණක් `nicArray[idx] = newNIC` ලෙස යාවත්කාලීන කරයි.
 
 ---
 
-## 🔧 Method 19 — `veiwStudent()`
+### 19. `veiwStudent()` — ශිෂ්‍ය තොරතුරු බැලීම
 
 ```java
 public static void veiwStudent()
 ```
 
-> **⚠️ Spelling Note:** Method name "View" → "Veiw" ෙෙෙ typo ෙෙෙ code ෙෙෙ ෙෙෙෙෙ.
+**භාවිතය:** ශිෂ්‍යයෙකුගේ නම, හැඳුනුම්පත, විෂයයන් දෙකෙහි ලකුණු සහ GPA අගය තිරය මත පෙන්වයි.
 
-Reg No input ෙෙෙ `findStudentIndex()` ෙෙෙ call. Student found ෙෙෙෙ:
-
-**GPA Calculation:**
-```java
-double gpa = (getGPA(prfArray[idx]) + getGPA(dbmsArray[idx])) / 2.0;
-```
-PRF marks ෙෙෙ `getGPA()` call ෙෙෙෙ GPA ෙෙෙෙෙ, DBMS ෙෙෙෙ ෙෙෙෙ, ෙෙ average ෙෙෙෙෙ.
-
-**Display:**
-- `formatMarks(prfArray[idx])` ෙෙෙ call ෙෙෙෙ PRF display — -1 → "Absent", -2 → "Not conducted"
-- `String.format(Locale.US, "%.3f", gpa)` → GPA ෙෙෙ 3 decimal places ෙෙෙෙ print
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. ලියාපදිංචි අංකය මඟින් ශිෂ්‍යයා පද්ධතියෙන් සොයා ගනී.
+2. ශිෂ්‍යයාගේ PRF සහ DBMS ලකුණු සඳහා `getGPA()` ක්‍රමවේදය ඇමතීමෙන් ලැබෙන GPA අගයන් දෙකෙහි සාමාන්‍යය (Average GPA) ගණනය කරයි: `(gpa1 + gpa2) / 2.0`.
+3. `formatMarks()` භාවිතයෙන් ලකුණු හැඩගස්වා තොරතුරු මුද්‍රණය කරයි. GPA අගය දශමස්ථාන 3කට සකසා පෙන්වයි.
 
 ---
 
-## 🔧 Method 20 — `deleteStudent()`
+### 20. `deleteStudent()` — ශිෂ්‍යයෙකු ඉවත් කිරීමේ තිරය
 
 ```java
 public static void deleteStudent()
 ```
 
-Reg No input ෙෙෙ student ෙෙෙෙෙ. Found ෙෙෙෙ full profile display (GPA calculate ෙෙෙ show ෙෙෙෙෙ). ෙෙෙ confirmation:
+**භාවිතය:** ලියාපදිංචි අංකය ලබාගෙන අදාළ ශිෂ්‍යයාගේ දත්ත පද්ධතියෙන් මකා දමයි.
 
-```java
-if (confirm.equalsIgnoreCase("Y")) {
-    deleteStudentFromArray(idx);
-}
-```
-
-`Y` ෙෙෙ confirm ෙෙෙ ෙෙෙ `deleteStudentFromArray(idx)` call ෙෙෙෙෙ — arrays 5 ෙෙෙ ෙෙ student ෙෙෙ data remove. ෙෙෙ another student delete Y/N loop.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. ශිෂ්‍යයා පද්ධතියෙන් සොයාගෙන ඔහුගේ සම්පූර්ණ තොරතුරු තිරයේ පෙන්වයි.
+2. මෙම ශිෂ්‍යයා පද්ධතියෙන් ඉවත් කිරීමට ස්ථිරවම එකඟදැයි විමසයි (Confirmation Y/N).
+3. එකඟ වන්නේ නම් (`Y`), `deleteStudentFromArray(idx)` ක්‍රමවේදය ක්‍රියාත්මක කර දත්ත මකා දමයි.
 
 ---
 
-## 🔧 Method 21 — `batchManagement()`
+### 21. `batchManagement()` — කණ්ඩායම් කළමනාකරණ මෙනුව
 
 ```java
 public static void batchManagement()
 ```
 
-`do-while(true)` loop ෙෙෙ batch management menu. Options:
-- `case 1` → `addBatch()`
-- `case 2` → `updateBatch()`
-- `case 3` → `viewBatches()`
-- `case 4` → `return` (home page)
+**භාවිතය:** කණ්ඩායම් ඇතුළත් කිරීම, තත්ත්වයන් යාවත්කාලීන කිරීම සහ පවතින කණ්ඩායම් බැලීම සඳහා වන උප මෙනුවයි.
 
 ---
 
-## 🔧 Method 22 — `addBatch()`
+### 22. `addBatch()` — කණ්ඩායමක් ඇතුළත් කිරීමේ තිරය
 
 ```java
 public static void addBatch()
 ```
 
-Batch number input ෙෙෙෙෙ. `exists = false` variable ෙෙෙ initialize ෙෙෙෙෙ.
+**භාවිතය:** නව කණ්ඩායම් අංකයක් පද්ධතියට එක් කරයි.
 
-**Duplicate check:**
-```java
-for (int b : batchNameArray) {
-    if (b == batchNum) {
-        exists = true;
-        break;  // ෙෙෙෙ match ෙෙෙ — loop stop
-    }
-}
-```
-For-each loop ෙෙෙ `batchNameArray` iterate. Match ෙෙෙ? `exists = true` ෙෙෙ set ෙෙෙ `break` ෙෙෙ loop exit.
-
-`exists == true` → error. `exists == false` → `addBatchToArray(batchNum)` call ෙෙෙ success.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. කණ්ඩායම් අංකය ලබා ගනී.
+2. එම අංකය දැනටමත් පවතීදැයි බැලීමට `batchNameArray` තුළ `for-each` ලූපයකින් සොයා බලයි.
+3. පවතී නම් දෝෂයක් පෙන්වන අතර, නොපවතී නම් `addBatchToArray()` මඟින් එය ඇතුළත් කරයි.
 
 ---
 
-## 🔧 Method 23 — `updateBatch()`
+### 23. `updateBatch()` — කණ්ඩායම් තත්ත්වය වෙනස් කිරීම
 
 ```java
 public static void updateBatch()
 ```
 
-Batch number input ෙෙෙෙෙ. `idx = -1` ෙෙෙ initialize ෙෙෙෙෙ.
+**භාවිතය:** යම් කණ්ඩායමක සිසුන් බඳවා ගැනීමේ තත්ත්වය (Open/Closed) වෙනස් කරයි (Toggle).
 
-**Index search:**
-```java
-for (int i = 0; i < batchNameArray.length; i++) {
-    if (batchNameArray[i] == batchNum) {
-        idx = i;
-        break;
-    }
-}
-```
-Match ෙෙෙෙ index `idx` ෙෙෙ save ෙෙෙ `break`.
-
-`idx == -1` → not found error.
-
-**Status Toggle:**
-Current status string create:
-```java
-String statusStr = (batchStatusArray[idx] == ENROLLMENTOPEN) ? "ENROLLMENT OPEN" : "ENROLLMENT CLOSED";
-```
-
-Confirm ෙෙෙ Y ෙෙෙ:
-```java
-batchStatusArray[idx] = (batchStatusArray[idx] == ENROLLMENTOPEN) ? ENROLLMENTCLOSED : ENROLLMENTOPEN;
-```
-ෙෙ ternary ෙෙෙ: current OPEN ෙෙෙ? → CLOSED ෙෙෙ set. CLOSED ෙෙෙ? → OPEN ෙෙෙ set. ෙෙෙෙෙ toggle ෙෙෙ.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. කණ්ඩායම් අංකය ලබාගෙන එය පද්ධතියේ පවතින දර්ශකය සොයා ගනී.
+2. පවතී නම්, එහි වත්මන් තත්ත්වය පෙන්වයි.
+3. තත්ත්වය වෙනස් කිරීමට පරිශීලකයා එකඟ වන්නේ නම්, පහත පරිදි ternary මෙහෙයුම ක්‍රියාත්මක කරයි:
+   ```java
+   batchStatusArray[idx] = (batchStatusArray[idx] == ENROLLMENTOPEN) ? ENROLLMENTCLOSED : ENROLLMENTOPEN;
+   ```
+   මෙයින් වත්මන් තත්ත්වය Open (1) නම් Closed (0) ලෙසද, Closed (0) නම් Open (1) ලෙසද මාරු වේ.
 
 ---
 
-## 🔧 Method 24 — `viewBatches()`
+### 24. `viewBatches()` — සියලුම කණ්ඩායම් බැලීම
 
 ```java
 public static void viewBatches()
 ```
 
-`batchNameArray` ෙෙෙ for loop ෙෙෙ iterate ෙෙෙෙෙ. ෙෙ iteration ෙෙෙ:
-- `batchStatusArray[i]` ෙෙෙ check ෙෙෙ status string ෙෙෙෙෙ
-- `getStudentCountForBatch(batchNameArray[i])` ෙෙෙ call ෙෙෙ student count ෙෙෙෙෙ
-- `printf()` ෙෙෙ formatted table row print
+**භාවිතය:** පද්ධතියේ ඇති සියලුම කණ්ඩායම්, ඒවායේ සිටින මුළු සිසුන් සංඛ්‍යාව සහ වත්මන් තත්ත්වය වගුවක් ලෙස පෙන්වයි.
 
-`printf("%-6d%-12d%-15d%-20s\n", ...)` → `-` ෙෙෙ left-align, number ෙෙෙ minimum column width ෙෙෙෙෙ table neat ෙෙෙ.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. `batchNameArray` හි ඇති සියලුම කණ්ඩායම් හරහා `for` ලූපයක් ධාවනය කරයි.
+2. සෑම කණ්ඩායමකටම අදාළ සිසුන් සංඛ්‍යාව `getStudentCountForBatch()` මඟින් ලබා ගනී.
+3. `System.out.printf()` මඟින් තොරතුරු පිළිවෙළකට පෙළගස්වා වගුවක් ලෙස මුද්‍රණය කරයි.
 
 ---
 
-## 🔧 Method 25 — `gradeManagement()`
+### 25. `gradeManagement()` — ලකුණු කළමනාකරණ මෙනුව
 
 ```java
 public static void gradeManagement()
 ```
 
-Grade menu:
-- `case 1` → `prfMarksUpdate()`
-- `case 2` → `dbmsMarksUpdate()`
-- `case 3` → `return`
+**භාවිතය:** සිසුන්ගේ PRF සහ DBMS ලකුණු ඇතුළත් කිරීම හෝ යාවත්කාලීන කිරීම සඳහා වන උප මෙනුවයි.
 
 ---
 
-## 🔧 Method 26 — `prfMarksUpdate()`
+### 26. `prfMarksUpdate()` — PRF ලකුණු ඇතුළත් කිරීම
 
 ```java
 public static void prfMarksUpdate()
 ```
 
-**Step 1:** Reg No input, `findStudentIndex()` call. Not found → retry.
+**භාවිතය:** ශිෂ්‍යයෙකුගේ PRF විෂයට අදාළ ලකුණු ඇතුළත් කරයි.
 
-**Step 2:** Student info display.
-
-**Step 3 — Existing Marks Check:**
-
-```java
-boolean performUpdate = true;
-
-if (prfArray[idx] >= 0) {
-    // Marks already exist
-    System.out.println("PRF Marks : " + prfArray[idx]);
-    // Confirmation Y/N
-    if (!conf.equalsIgnoreCase("Y")) {
-        performUpdate = false;  // Update cancel
-    }
-} else if (prfArray[idx] == -1) {
-    // Absent — update allowed without extra confirmation
-    System.out.println("Student was absent...");
-}
-// -2 (not conducted) — directly falls through to update
-```
-
-`performUpdate` flag ෙෙෙ use ෙෙෙෙෙ — marks already ෙෙෙෙ user confirm ෙෙ ෙෙ "N" ෙෙෙ update skip ෙෙෙෙෙ.
-
-**Step 4 — Input Validation Loop:**
-```java
-int newMark = -3;
-while (true) {
-    newMark = scanner.nextInt();
-    if (newMark == -1 || (newMark >= 0 && newMark <= 100)) {
-        break;  // Valid input — loop exit
-    }
-    System.out.println("Invalid marks...");  // Loop again
-}
-```
-`-3` ෙෙෙ invalid sentinel value ෙෙෙ. Valid input ෙෙෙ ෙෙ `-1` (absent) ෙෙ `0-100` range. ෙෙෙ valid ෙෙෙෙ `break` ෙෙෙ loop exit. ෙෙෙෙෙ loop continue.
-
-**Step 5:** `prfArray[idx] = newMark` — directly update.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. ශිෂ්‍යයා සොයාගෙන ඔහුගේ තොරතුරු පෙන්වයි.
+2. ශිෂ්‍යයාගේ වත්මන් ලකුණු පරීක්ෂා කරයි:
+   - ලකුණ 0 හෝ ඊට වැඩි නම්, දැනටමත් ලකුණු ඇතුළත් කර ඇති බැවින් නැවත වෙනස් කිරීමට අවසර ඉල්ලයි.
+   - ලකුණ `-1` (Absent) නම්, විභාගයට පැමිණ නැති බැවින් ලකුණු ඇතුළත් කිරීමට කෙළින්ම ඉඩ දෙයි.
+3. ලකුණු ලබා ගැනීමේදී `while(true)` ලූපයක් භාවිතයෙන් වලංගුභාවය පරීක්ෂා කරයි (Input Validation):
+   - ඇතුළත් කරන අගය `-1` හෝ `0 ත් 100 ත් අතර` විය යුතුය.
+   - වැරදි අගයක් ඇතුළත් කළහොත් නැවත ඇතුළත් කරන තෙක් ලූපය ක්‍රියාත්මක වේ.
+4. වලංගු අගය `prfArray[idx]` වෙත ඇතුළත් කරයි.
 
 ---
 
-## 🔧 Method 27 — `dbmsMarksUpdate()`
+### 27. `dbmsMarksUpdate()` — DBMS ලකුණු ඇතුළත් කිරීම
 
 ```java
 public static void dbmsMarksUpdate()
 ```
 
-`prfMarksUpdate()` ෙෙෙ exact same logic. ෙෙෙෙෙ ෙෙෙෙෙ `prfArray` ෙෙ `dbmsArray` ෙෙෙ use ෙෙෙෙෙ, display text ෙෙෙ "PRF" ෙෙ "DBMS" ෙෙෙ වෙෙෙස.
+**භාවිතය:** ශිෂ්‍යයෙකුගේ DBMS විෂයට අදාළ ලකුණු ඇතුළත් කරයි. ක්‍රියාකාරීත්වය `prfMarksUpdate()` ට සම්පූර්ණයෙන්ම සමාන වේ.
 
 ---
 
-## 🔧 Method 28 — `reportGenerator()`
+### 28. `reportGenerator()` — වාර්තා මෙනුව
 
 ```java
 public static void reportGenerator()
 ```
 
-Report menu:
-- `case 1` → `studentRegistrationReport()`
-- `case 2` → `batchWiseStudentReport()`
-- `case 3` → `industryTrainingEligibilityReport()`
-- `case 4` → `return`
+**භාවිතය:** පද්ධතියෙන් ලබාගත හැකි විවිධ වාර්තා තේරීම සඳහා වන උප මෙනුවයි.
 
 ---
 
-## 🔧 Method 29 — `studentRegistrationReport()`
+### 29. `studentRegistrationReport()` — ශිෂ්‍ය ලියාපදිංචි වාර්තාව
 
 ```java
 public static void studentRegistrationReport()
 ```
 
-ෙෙ report ෙෙෙ students alphabetically sorted ෙෙෙ table ෙෙෙ display ෙෙෙෙෙ. **Direct array sorting ෙෙ** — index-based sorting technique.
+**භාවිතය:** පද්ධතියේ සිටින සියලුම සිසුන්ගේ තොරතුරු ඔවුන්ගේ නම්වල අකාරාදී පිළිවෙළට (Alphabetical Order) වගුවක් ලෙස පෙන්වයි.
 
-**Step 1 — Index Array:**
-```java
-int[] tempIndices = new int[nameArray.length];
-for (int i = 0; i < tempIndices.length; i++) {
-    tempIndices[i] = i;  // {0, 1, 2, 3, ...}
-}
-```
-`tempIndices` ෙෙෙ `{0, 1, 2, 3, ...}` ෙෙෙ initialize. ෙෙ array ෙෙෙ sort ෙෙෙෙ, actual data arrays ෙෙ modify ෙෙ ෙෙ.
-
-**Step 2 — Bubble Sort:**
-```java
-for (int i = 0; i < tempIndices.length - 1; i++) {
-    for (int j = i + 1; j < tempIndices.length; j++) {
-        if (nameArray[tempIndices[i]].compareToIgnoreCase(nameArray[tempIndices[j]]) > 0) {
-            // Swap indices (not actual data!)
-            int temp = tempIndices[i];
-            tempIndices[i] = tempIndices[j];
-            tempIndices[j] = temp;
-        }
-    }
-}
-```
-
-Outer loop `i` ෙෙ inner loop `j` — ෙෙ pair ෙෙෙ compare. `nameArray[tempIndices[i]]` → ෙෙෙ `i` position index ෙෙෙ name ෙෙෙෙෙ. `compareToIgnoreCase()` → alphabetically compare. Result > 0 ෙෙෙ? ෙෙෙෙෙ `i` ෙෙෙ name ෙෙ `j` ෙෙෙ ෙෙ bigger → swap ෙෙෙෙෙ. **Swap ෙෙෙෙෙ ෙෙෙ names ෙෙ, indices!**
-
-**Step 3 — Print:**
-```java
-for (int i = 0; i < tempIndices.length; i++) {
-    int idx = tempIndices[i];  // sorted order ෙෙෙ index
-    double gpa = (getGPA(prfArray[idx]) + getGPA(dbmsArray[idx])) / 2.0;
-    System.out.printf("%-5d%-18s%-30s...\n", (i+1), regNoArray[idx], nameArray[idx], ...);
-}
-```
-
-`tempIndices[i]` ෙෙෙ sorted order ෙෙෙ index ෙෙෙෙෙ, ෙෙ use ෙෙෙෙ all arrays ෙෙෙ correct student data ෙෙෙෙෙ.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. මුල් දත්ත අරාවන් එලෙසම තබා ගනිමින් වර්ග කිරීම (Sorting) සිදු කිරීම සඳහා තාවකාලික දර්ශක අරාවක් (Temporary Index Array) සාදා ගනී: `tempIndices = {0, 1, 2, ...}`.
+2. **බබල් සෝට් (Bubble Sort)** ක්‍රමය භාවිතයෙන් මෙම දර්ශක අරාව වර්ග කරයි:
+   - සිසුන්ගේ නම් දෙකක් `compareToIgnoreCase()` මඟින් සසඳයි.
+   - පළමු නම දෙවන නමට වඩා අකාරාදී පිළිවෙළින් පසුපසින් තිබේ නම්, දර්ශක අරාවේ ඇති අගයන් දෙක එකිනෙකා මාරු (Swap) කරයි.
+3. වර්ග කළ දර්ශක අරාව (`tempIndices`) ඇසුරෙන් සිසුන්ගේ දත්ත පිළිවෙළින් ලබාගෙන වගුවක් ලෙස මුද්‍රණය කරයි.
 
 ---
 
-## 🔧 Method 30 — `batchWiseStudentReport()`
+### 30. `batchWiseStudentReport()` — කණ්ඩායම් අනුව ශිෂ්‍ය වාර්තාව
 
 ```java
 public static void batchWiseStudentReport()
 ```
 
-Loop ෙෙෙ `batchNameArray` iterate ෙෙෙ available batches list print ෙෙෙෙෙ:
-```java
-for (int i = 0; i < batchNameArray.length; i++) {
-    System.out.println("[" + (i+1) + "] " + batchNameArray[i] + " Batch");
-}
-System.out.println("[" + (batchNameArray.length + 1) + "] Exit");
-```
-Last option dynamically generate ෙෙෙෙෙ. User choice ෙෙෙෙ:
-- `option == batchNameArray.length + 1` → Exit
-- `1` ෙෙ `batchNameArray.length` ෙෙෙෙ range ෙෙෙ → `showBatchReport(batchNameArray[option - 1])` call
-- ෙෙෙෙෙ → invalid option
+**භාවිතය:** පවතින කණ්ඩායම් ලැයිස්තුව පෙන්වා, පරිශීලකයා තෝරාගන්නා නිශ්චිත කණ්ඩායමකට පමණක් අදාළ ශිෂ්‍ය වාර්තාව ලබා දෙයි.
 
 ---
 
-## 🔧 Method 31 — `showBatchReport(int batchNum)` *(private)*
+### 31. `showBatchReport(int batchNum)` — කණ්ඩායම් වාර්තාව දර්ශනය කිරීම
 
 ```java
 private static void showBatchReport(int batchNum)
 ```
 
-**Step 1 — Count students:**
-```java
-int count = 0;
-for (String regNo : regNoArray) {
-    if (regNo.length() >= 7 && regNo.substring(4, 7).equals(batchStr)) {
-        count++;
-    }
-}
-```
+**භාවිතය:** තෝරාගත් කණ්ඩායමේ සිසුන්ගේ තොරතුරු පමණක් ඔවුන්ගේ නම්වල අකාරාදී පිළිවෙළට පෙන්වයි.
 
-**Step 2 — Collect indices:**
-```java
-int[] batchIndices = new int[count];
-int k = 0;
-for (int i = 0; i < regNoArray.length; i++) {
-    if (regNoArray[i].length() >= 7 && regNoArray[i].substring(4, 7).equals(batchStr)) {
-        batchIndices[k++] = i;
-    }
-}
-```
-`k++` → ෙෙෙෙ `k` value use ෙෙෙ ෙෙෙ increment — post-increment. Match ෙෙෙ student ෙෙෙ index `batchIndices` ෙෙෙ store.
-
-**Step 3 — Bubble Sort (same as Report 1):** Name alphabetical sort by index swapping.
-
-**Step 4 — Print:** sorted ෙෙෙ table.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. ප්‍රථමයෙන් එම කණ්ඩායමට අයත් සිසුන් ගණන බලා ගනී.
+2. එම සිසුන්ගේ දර්ශක අංක පමණක් ගබඩා කර ගැනීමට `batchIndices` නමින් අරාවක් සාදයි.
+3. මුළු ශිෂ්‍ය ලිස්තුවම පරීක්ෂා කර අදාළ කණ්ඩායමේ සිසුන්ගේ දර්ශක පමණක් එම අරාවට ඇතුළත් කරයි.
+4. බබල් සෝට් (Bubble Sort) ක්‍රමයෙන් එම දර්ශක වර්ග කරයි.
+5. වර්ග කළ පිළිවෙළට සිසුන්ගේ විස්තර වගුවක මුද්‍රණය කරයි.
 
 ---
 
-## 🔧 Method 32 — `industryTrainingEligibilityReport()`
+### 32. `industryTrainingEligibilityReport()` — කර්මාන්ත පුහුණු සුදුසුකම් වාර්තාව
 
 ```java
 public static void industryTrainingEligibilityReport()
 ```
 
-Industry Training ෙෙෙ eligible ෙෙෙෙෙ ෙෙ criteria 3ක ෙෙෙ satisfy ෙෙෙෙ.
+**භාවිතය:** කර්මාන්ත පුහුණුව (Internship) සඳහා සුදුසුකම් ලබා ඇති සිසුන්ගේ ලැයිස්තුව පෙන්වයි.
 
-**Eligibility Check:**
-```java
-double gpa = (getGPA(prfArray[i]) + getGPA(dbmsArray[i])) / 2.0;
-if (gpa > 3.25 && prfArray[i] > 50 && dbmsArray[i] > 50) {
-    count++;
-}
-```
+**සුදුසුකම් ලැබීමේ කොන්දේසි (Eligibility Criteria):**
+යම් ශිෂ්‍යයෙකු සුදුසුකම් ලැබීමට නම් පහත කොන්දේසි 3ම එකවර සපුරාලිය යුතුය:
+1. සාමාන්‍ය GPA අගය `3.25` ට වඩා වැඩි විය යුතුය (`gpa > 3.25`).
+2. PRF ලකුණු `50` ට වඩා වැඩි විය යුතුය (`prfArray[i] > 50`).
+3. DBMS ලකුණු `50` ට වඩා වැඩි විය යුතුය (`dbmsArray[i] > 50`).
 
-3 conditions **AND** ෙෙෙ connected:
-| Condition | Meaning |
-|-----------|---------|
-| `gpa > 3.25` | GPA strictly 3.25 ෙෙ ෙෙෙ |
-| `prfArray[i] > 50` | PRF marks 51+ |
-| `dbmsArray[i] > 50` | DBMS marks 51+ |
-
-**Two-pass approach:**
-- **First pass** → eligible count ෙෙෙෙෙ (array size decide ෙෙෙෙ)
-- `count == 0` → "No eligible students" message
-- **Second pass** → eligible students print
-
-ෙෙ passes ෙෙෙ `count == 0` ෙෙෙ ෙෙ print block skip ෙෙෙෙෙ.
+**ක්‍රියාකාරී තර්කනය (Logic Flow):**
+1. ප්‍රථමයෙන් මුළු ලිස්තුවම පරීක්ෂා කර සුදුසුකම් ලත් සිසුන් සංඛ්‍යාව ගණනය කරයි.
+2. කිසිදු ශිෂ්‍යයෙකු සුදුසුකම් ලබා නැත්නම් `"No eligible students found."` ලෙස පෙන්වයි.
+3. සුදුසුකම් ලත් සිසුන් සිටී නම්, නැවත වටයකින් එම සිසුන්ගේ තොරතුරු පමණක් වගුවක් ලෙස මුද්‍රණය කරයි.
 
 ---
 
-## 🔧 Method 33 — `main(String[] args)`
+### 33. `main(String args[])` — ප්‍රධාන ක්‍රියාත්මක කරන්නා
 
 ```java
 public static void main(String args[])
 ```
 
-JVM ෙෙෙ program run ෙෙෙෙෙ invoke ෙෙෙ entry point. `homePage()` ෙෙෙ call ෙෙෙෙෙ. `homePage()` infinite `do-while(true)` loop ෙෙෙ ෙෙ `exit()` call ෙෙ program terminate ෙෙෙ main ෙෙෙ never returns.
+**භාවිතය:** ජාවා පරිසරය (JVM) මඟින් ක්‍රමලේඛය ධාවනය කිරීම ආරම්භ කරන ප්‍රධාන දොරටුවයි. මෙය සෘජුවම `homePage()` ක්‍රමවේදය අමතයි.
 
 ---
 
-## 📊 Methods Summary Table
+## 📊 ක්‍රමවේදවල සාරාංශ වගුව (Summary Table)
 
-| # | Method | Return | ෙෙෙ කෙරෙෙ |
-|---|--------|--------|-----------|
-| 1 | `clearConsole()` | void | OS-specific console clear |
-| 2 | `exit()` | void | Program terminate |
-| 3 | `getGPA(int)` | double | Marks → GPA grade scale |
-| 4 | `formatMarks(int)` | String | -1/-2 → Absent/Not conducted |
-| 5 | `findStudentIndex(String)` | int | RegNo ෙෙෙ index ෙෙෙෙෙ |
-| 6 | `findStudentIndexByNIC(String)` | int | NIC ෙෙෙ index ෙෙෙෙෙ |
-| 7 | `checkBadgeStatus(int)` | int | Batch enrollment status |
-| 8 | `isDuplicateNIC(String)` | boolean | NIC already exists? |
-| 9 | `checkNIC(String)` | boolean | isDuplicateNIC wrapper |
-| 10 | `getStudentCountForBatch(int)` | int | Batch student count |
-| 11 | `generateStudentID(int, bool)` | String | Auto Reg No generate |
-| 12 | `addStudentToArray(...)` | void | Arrays resize + append |
-| 13 | `deleteStudentFromArray(int)` | void | Arrays resize + skip |
-| 14 | `addBatchToArray(int)` | void | Batch arrays resize + append |
-| 15 | `homePage()` | void | Main menu loop |
-| 16 | `studentManagement()` | void | Student sub-menu loop |
-| 17 | `addStudent()` | void | Multi-layer validation + add |
-| 18 | `updateStudent()` | void | Name/NIC update |
-| 19 | `veiwStudent()` | void | Profile display |
-| 20 | `deleteStudent()` | void | Confirm + delete |
-| 21 | `batchManagement()` | void | Batch sub-menu loop |
-| 22 | `addBatch()` | void | Duplicate check + add |
-| 23 | `updateBatch()` | void | Status toggle |
-| 24 | `viewBatches()` | void | Table display |
-| 25 | `gradeManagement()` | void | Grade sub-menu loop |
-| 26 | `prfMarksUpdate()` | void | PRF marks + validation |
-| 27 | `dbmsMarksUpdate()` | void | DBMS marks + validation |
-| 28 | `reportGenerator()` | void | Report sub-menu loop |
-| 29 | `studentRegistrationReport()` | void | Index-sort + full report |
-| 30 | `batchWiseStudentReport()` | void | Batch selection menu |
-| 31 | `showBatchReport(int)` | void | Filter + sort + print |
-| 32 | `industryTrainingEligibilityReport()` | void | 3-criteria eligibility |
-| 33 | `main(String[])` | void | JVM entry point |
+| අංකය | ක්‍රමවේදය (Method) | ආපසු හරවන දත්ත වර්ගය | කාර්යය |
+| :--- | :--- | :--- | :--- |
+| 1 | `clearConsole()` | void | පරිගණක තිරය මකා පිරිසිදු කිරීම |
+| 2 | `exit()` | void | පද්ධතියෙන් සාර්ථකව ඉවත් වීම |
+| 3 | `getGPA(int)` | double | ලකුණු සඳහා අදාළ GPA අගය සෙවීම |
+| 4 | `formatMarks(int)` | String | සෘණ ලකුණු අගයන් වචන බවට හැරවීම |
+| 5 | `findStudentIndex(String)` | int | ලියාපදිංචි අංකයෙන් ශිෂ්‍ය දර්ශකය සෙවීම |
+| 6 | `findStudentIndexByNIC(String)` | int | හැඳුනුම්පතෙන් ශිෂ්‍ය දර්ශකය සෙවීම |
+| 7 | `checkBadgeStatus(int)` | int | කණ්ඩායමේ ලියාපදිංචි තත්ත්වය සෙවීම |
+| 8 | `isDuplicateNIC(String)` | boolean | හැඳුනුම්පත පද්ධතියේ තිබේදැයි බැලීම |
+| 9 | `checkNIC(String)` | boolean | `isDuplicateNIC` හි බාහිර ක්‍රමවේදය |
+| 10 | `getStudentCountForBatch(int)` | int | කණ්ඩායමේ සිටින මුළු සිසුන් ගණන |
+| 11 | `generateStudentID(int, boolean)` | String | නව සිසුවෙකුට අනන්‍ය අංකයක් සෑදීම |
+| 12 | `addStudentToArray(...)` | void | සිසු දත්ත අරාවන් විශාල කර එකතු කිරීම |
+| 13 | `deleteStudentFromArray(int)` | void | අරාවන් කුඩා කර සිසු දත්ත ඉවත් කිරීම |
+| 14 | `addBatchToArray(int)` | void | නව කණ්ඩායමක් අරාවට එක් කිරීම |
+| 15 | `homePage()` | void | පද්ධතියේ ප්‍රධාන මෙනුව ධාවනය කිරීම |
+| 16 | `studentManagement()` | void | ශිෂ්‍ය කළමනාකරණ මෙනුව ධාවනය කිරීම |
+| 17 | `addStudent()` | void | නව ශිෂ්‍යයෙකු ඇතුළත් කිරීමේ තිරය |
+| 18 | `updateStudent()` | void | ශිෂ්‍ය නම හෝ NIC වෙනස් කිරීම |
+| 19 | `veiwStudent()` | void | ශිෂ්‍යයාගේ සම්පූර්ණ තොරතුරු පෙන්වීම |
+| 20 | `deleteStudent()` | void | ශිෂ්‍යයෙකු ඉවත් කිරීමේ තිරය |
+| 21 | `batchManagement()` | void | කණ්ඩායම් කළමනාකරණ මෙනුව ධාවනය කිරීම |
+| 22 | `addBatch()` | void | නව කණ්ඩායමක් ඇතුළත් කිරීමේ තිරය |
+| 23 | `updateBatch()` | void | කණ්ඩායම් ලියාපදිංචි තත්ත්වය මාරු කිරීම |
+| 24 | `viewBatches()` | void | පවතින සියලුම කණ්ඩායම් ලැයිස්තුව බැලීම |
+| 25 | `gradeManagement()` | void | ලකුණු කළමනාකරණ මෙනුව ධාවනය කිරීම |
+| 26 | `prfMarksUpdate()` | void | PRF විෂයට ලකුණු ඇතුළත් කිරීම |
+| 27 | `dbmsMarksUpdate()` | void | DBMS විෂයට ලකුණු ඇතුළත් කිරීම |
+| 28 | `reportGenerator()` | void | වාර්තා තේරීමේ මෙනුව ධාවනය කිරීම |
+| 29 | `studentRegistrationReport()` | void | සිසුන් වර්ග කර සම්පූර්ණ වාර්තාව දීම |
+| 30 | `batchWiseStudentReport()` | void | කණ්ඩායම් තේරීමේ මෙනුව ධාවනය කිරීම |
+| 31 | `showBatchReport(int)` | void | තෝරාගත් කණ්ඩායමේ සිසුන් වර්ග කර පෙන්වීම |
+| 32 | `industryTrainingEligibilityReport()` | void | පුහුණුවට සුදුසුකම් ලැබූ සිසුන් පෙන්වීම |
+| 33 | `main(String[])` | void | ක්‍රමලේඛයේ ආරම්භක ස්ථානය |
 
 ---
 
-## 🔄 Program Flow
+## 🔄 පද්ධතියේ ගලායාම (Program Flow Diagram)
 
 ```
 main()
-  └── homePage()  [infinite loop]
-        ├── [1] studentManagement()  [sub-loop]
-        │     ├── [1] addStudent()       ← batch check → NIC check → generate ID → add
-        │     ├── [2] updateStudent()    ← find → name/NIC update
-        │     ├── [3] veiwStudent()      ← find → GPA calc → display
-        │     └── [4] deleteStudent()    ← find → confirm → delete
-        ├── [2] batchManagement()  [sub-loop]
-        │     ├── [1] addBatch()         ← duplicate check → add
-        │     ├── [2] updateBatch()      ← find → toggle status
-        │     └── [3] viewBatches()      ← count → table print
-        ├── [3] gradeManagement()  [sub-loop]
-        │     ├── [1] prfMarksUpdate()   ← find → validate → update
-        │     └── [2] dbmsMarksUpdate()  ← same logic, DBMS array
-        ├── [4] reportGenerator()  [sub-loop]
-        │     ├── [1] studentRegistrationReport()       ← index sort → print all
-        │     ├── [2] batchWiseStudentReport()          ← select batch
-        │     │         └── showBatchReport(batchNum)   ← filter → sort → print
-        │     └── [3] industryTrainingEligibilityReport() ← 3-criteria → print
-        └── [5] exit()  ← System.exit(0)
+  └── homePage()
+        ├── [1] studentManagement()
+        │     ├── [1] addStudent()
+        │     ├── [2] updateStudent()
+        │     ├── [3] veiwStudent()
+        │     └── [4] deleteStudent()
+        ├── [2] batchManagement()
+        │     ├── [1] addBatch()
+        │     ├── [2] updateBatch()
+        │     └── [3] viewBatches()
+        ├── [3] gradeManagement()
+        │     ├── [1] prfMarksUpdate()
+        │     └── [2] dbmsMarksUpdate()
+        ├── [4] reportGenerator()
+        │     ├── [1] studentRegistrationReport()
+        │     ├── [2] batchWiseStudentReport()
+        │     │         └── showBatchReport()
+        │     └── [3] industryTrainingEligibilityReport()
+        └── [5] exit()
 ```
 
 ---
 
-## ⚠️ Special Values Reference
-
-| Value | Context | Meaning |
-|-------|---------|---------|
-| `-1` | marks | Absent |
-| `-2` | marks | Not conducted |
-| `0` | batch status | ENROLLMENT CLOSED |
-| `1` | batch status | ENROLLMENT OPEN |
-| `-1` | index return | Not found |
-| `-3` | prfMarksUpdate sentinel | Invalid/unset mark (temp variable) |
-
----
-
-*Source: [StudentManagementSystem.java](file:///D:/Coding/Projects/iCET/Coursework/Coursework%202/StudentManagementSystem.java)*
+*මූලාශ්‍ර ගොනුව: [StudentManagementSystem.java](file:///D:/Coding/Projects/iCET/Coursework/Coursework%202/StudentManagementSystem.java)*
